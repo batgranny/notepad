@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="32" height="32">
-  <!-- Document sheet in deep/vibrant blue -->
-  <path stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-  <!-- Pencil/Edit indicator in lighter bright blue -->
-  <path stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Solid background to prevent browser-enforced drop-shadow/halos -->
+  <rect width="32" height="32" rx="8" fill="#111827" />
+  <!-- Document sheet in clean white -->
+  <path fill="none" stroke="#f9fafb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M22 16v5.5A2.5 2.5 0 0119.5 24H8.5A2.5 2.5 0 016 21.5V10.5A2.5 2.5 0 018.5 8H14" />
+  <!-- Writing pencil in bright SRE blue -->
+  <path fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M20.862 6.487l1.687 1.688-10.93 10.931-2.619.794.793-2.619 10.931-10.931z" />
 </svg>
