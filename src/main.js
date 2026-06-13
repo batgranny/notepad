@@ -62,7 +62,16 @@ const elements = {
   cursorPosLabel: document.getElementById("cursor-pos-label"),
   
   // Hidden inputs
-  fallbackFileInput: document.getElementById("fallback-file-input")
+  fallbackFileInput: document.getElementById("fallback-file-input"),
+
+  // SRE Tools dropdown and items
+  sreToolsBtn: document.getElementById("sre-tools-btn"),
+  sreToolsMenu: document.getElementById("sre-tools-menu"),
+  sreJsonBtn: document.getElementById("sre-json-btn"),
+  sreB64decodeBtn: document.getElementById("sre-b64decode-btn"),
+  sreB64encodeBtn: document.getElementById("sre-b64encode-btn"),
+  sreEpochToDateBtn: document.getElementById("sre-epoch-to-date-btn"),
+  sreDateToEpochBtn: document.getElementById("sre-date-to-epoch-btn")
 };
 
 // --- Initialization ---
@@ -228,6 +237,45 @@ function setupEventListeners() {
   elements.toggleWrapBtn.addEventListener("click", toggleWordWrap);
   elements.toggleLinesBtn.addEventListener("click", toggleLineNumbers);
   elements.themeToggleBtn.addEventListener("click", toggleTheme);
+
+  // SRE Tools dropdown toggle
+  elements.sreToolsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const container = elements.sreToolsBtn.closest(".dropdown-container");
+    container.classList.toggle("active");
+    elements.sreToolsMenu.classList.toggle("show");
+  });
+
+  // Close dropdown menu when clicking anywhere else
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".dropdown-container")) {
+      const container = elements.sreToolsBtn.closest(".dropdown-container");
+      if (container) container.classList.remove("active");
+      elements.sreToolsMenu.classList.remove("show");
+    }
+  });
+
+  // SRE Tool Actions
+  elements.sreJsonBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    prettifyJSON();
+  });
+  elements.sreB64decodeBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    base64Decode();
+  });
+  elements.sreB64encodeBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    base64Encode();
+  });
+  elements.sreEpochToDateBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    convertEpochToDate();
+  });
+  elements.sreDateToEpochBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    convertDateToEpoch();
+  });
 
   // Fallback file input
   elements.fallbackFileInput.addEventListener("change", handleFallbackFileOpen);
@@ -872,5 +920,226 @@ async function saveFileAs() {
       console.error(err);
       showTemporaryStatus("Failed to save file");
     }
+  }
+}
+
+// --- SRE Utility Implementations ---
+
+function closeSreToolsMenu() {
+  const container = elements.sreToolsBtn.closest(".dropdown-container");
+  if (container) container.classList.remove("active");
+  elements.sreToolsMenu.classList.remove("show");
+}
+
+// 1. JSON Prettifier
+function prettifyJSON() {
+  const tx = elements.textarea;
+  const start = tx.selectionStart;
+  const end = tx.selectionEnd;
+  const selectedText = tx.value.substring(start, end);
+  
+  if (start !== end && selectedText.trim().length > 0) {
+    // Process selected text
+    try {
+      const parsed = JSON.parse(selectedText);
+      const formatted = JSON.stringify(parsed, null, 2);
+      tx.value = tx.value.substring(0, start) + formatted + tx.value.substring(end);
+      tx.setSelectionRange(start, start + formatted.length);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Formatted selected JSON");
+    } catch (e) {
+      showTemporaryStatus("Error: Selected text is not valid JSON");
+    }
+  } else {
+    // Process whole document
+    if (tx.value.trim().length === 0) {
+      showTemporaryStatus("Error: Document is empty");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(tx.value);
+      tx.value = JSON.stringify(parsed, null, 2);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Formatted JSON document");
+    } catch (e) {
+      showTemporaryStatus("Error: Document is not valid JSON");
+    }
+  }
+}
+
+// UTF-8 friendly Base64 helper methods
+function utf8_to_b64(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  }));
+}
+
+function b64_to_utf8(str) {
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
+// 2. Base64 Decode
+function base64Decode() {
+  const tx = elements.textarea;
+  const start = tx.selectionStart;
+  const end = tx.selectionEnd;
+  const selectedText = tx.value.substring(start, end);
+  
+  if (start !== end && selectedText.trim().length > 0) {
+    try {
+      const decoded = b64_to_utf8(selectedText.trim());
+      tx.value = tx.value.substring(0, start) + decoded + tx.value.substring(end);
+      tx.setSelectionRange(start, start + decoded.length);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Decoded selected Base64");
+    } catch (e) {
+      showTemporaryStatus("Error: Invalid Base64 selected");
+    }
+  } else {
+    if (tx.value.trim().length === 0) {
+      showTemporaryStatus("Error: Document is empty");
+      return;
+    }
+    try {
+      const decoded = b64_to_utf8(tx.value.trim());
+      tx.value = decoded;
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Decoded Base64 document");
+    } catch (e) {
+      showTemporaryStatus("Error: Document is not valid Base64");
+    }
+  }
+}
+
+// 3. Base64 Encode
+function base64Encode() {
+  const tx = elements.textarea;
+  const start = tx.selectionStart;
+  const end = tx.selectionEnd;
+  const selectedText = tx.value.substring(start, end);
+  
+  if (start !== end && selectedText.trim().length > 0) {
+    try {
+      const encoded = utf8_to_b64(selectedText);
+      tx.value = tx.value.substring(0, start) + encoded + tx.value.substring(end);
+      tx.setSelectionRange(start, start + encoded.length);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Encoded selected text to Base64");
+    } catch (e) {
+      showTemporaryStatus("Error during encoding");
+    }
+  } else {
+    if (tx.value.length === 0) {
+      showTemporaryStatus("Error: Document is empty");
+      return;
+    }
+    try {
+      const encoded = utf8_to_b64(tx.value);
+      tx.value = encoded;
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Encoded document to Base64");
+    } catch (e) {
+      showTemporaryStatus("Error during encoding");
+    }
+  }
+}
+
+// Helper to get selected text or word under cursor
+function getSelectionOrWordUnderCursor() {
+  const tx = elements.textarea;
+  let start = tx.selectionStart;
+  let end = tx.selectionEnd;
+  
+  if (start === end) {
+    const text = tx.value;
+    // Expand selection to word boundaries (not whitespace, commas, brackets, etc.)
+    while (start > 0 && /[^ \t\n\r,;()[\]{}"']/.test(text[start - 1])) start--;
+    while (end < text.length && /[^ \t\n\r,;()[\]{}"']/.test(text[end])) end++;
+    
+    // Select it visually for feedback
+    tx.setSelectionRange(start, end);
+  }
+  
+  return {
+    start,
+    end,
+    text: tx.value.substring(start, end).trim()
+  };
+}
+
+// 4. Epoch ➔ ISO Date
+function convertEpochToDate() {
+  const tx = elements.textarea;
+  const { start, end, text } = getSelectionOrWordUnderCursor();
+  
+  if (!text) {
+    showTemporaryStatus("Error: No text selected/found under cursor");
+    return;
+  }
+  
+  // Clean text of common suffixes (e.g. L or ms)
+  const cleanText = text.replace(/[Lms]$/i, "");
+  const num = Number(cleanText);
+  
+  if (isNaN(num) || num <= 0) {
+    showTemporaryStatus("Error: Not a valid numeric timestamp");
+    return;
+  }
+  
+  // Heuristic: seconds vs milliseconds
+  const isSeconds = num < 5000000000;
+  const dateVal = num * (isSeconds ? 1000 : 1);
+  
+  try {
+    const date = new Date(dateVal);
+    if (isNaN(date.getTime())) {
+      showTemporaryStatus("Error: Invalid date value");
+      return;
+    }
+    
+    const isoStr = date.toISOString();
+    tx.value = tx.value.substring(0, start) + isoStr + tx.value.substring(end);
+    tx.setSelectionRange(start, start + isoStr.length);
+    isDirty = true;
+    syncEditor();
+    showTemporaryStatus(`Converted Timestamp ➔ ${isoStr}`);
+  } catch (e) {
+    showTemporaryStatus("Error converting timestamp");
+  }
+}
+
+// 5. Date ➔ Epoch Seconds
+function convertDateToEpoch() {
+  const tx = elements.textarea;
+  const { start, end, text } = getSelectionOrWordUnderCursor();
+  
+  if (!text) {
+    showTemporaryStatus("Error: No text selected/found under cursor");
+    return;
+  }
+  
+  try {
+    const parsedTime = Date.parse(text);
+    if (isNaN(parsedTime)) {
+      showTemporaryStatus("Error: Not a valid date string");
+      return;
+    }
+    
+    const epochSecs = Math.floor(parsedTime / 1000).toString();
+    tx.value = tx.value.substring(0, start) + epochSecs + tx.value.substring(end);
+    tx.setSelectionRange(start, start + epochSecs.length);
+    isDirty = true;
+    syncEditor();
+    showTemporaryStatus(`Converted Date ➔ ${epochSecs} epoch seconds`);
+  } catch (e) {
+    showTemporaryStatus("Error converting date");
   }
 }

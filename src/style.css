@@ -601,6 +601,73 @@ mark.search-match.active-match {
   display: none !important;
 }
 
+/* Dropdown Menu Styling */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 0.35rem;
+  z-index: 110;
+  display: none;
+  flex-direction: column;
+  min-width: 190px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--panel-backdrop);
+}
+
+.dropdown-menu.show {
+  display: flex;
+}
+
+.dropdown-item {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  display: block;
+  width: 100%;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.3rem 0;
+}
+
+.dropdown-arrow {
+  font-size: 0.6rem;
+  margin-left: 4px;
+  opacity: 0.6;
+  transition: transform 0.15s ease;
+}
+
+.dropdown-container.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
 /* Custom Scrollbars for premium appearance */
 ::-webkit-scrollbar {
   width: 10px;
