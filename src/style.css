@@ -1,0 +1,622 @@
+/* Design System & Theme Custom Properties */
+:root {
+  /* Common variables */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.15s ease;
+  
+  /* Light Theme (Default) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-muted: rgba(37, 99, 235, 0.08);
+  --caret-color: #2563eb;
+  --selection-bg: rgba(37, 99, 235, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --panel-backdrop: rgba(255, 255, 255, 0.7);
+  
+  /* Highlight colors */
+  --match-highlight-bg: rgba(253, 224, 71, 0.45); /* Yellow */
+  --match-active-highlight-bg: rgba(249, 115, 22, 0.55); /* Orange */
+  --match-border: rgba(234, 179, 8, 0.5);
+  --match-active-border: rgba(234, 88, 12, 0.8);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  --bg-primary: #090d16;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  --border-color: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-color: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-muted: rgba(59, 130, 246, 0.15);
+  --caret-color: #3b82f6;
+  --selection-bg: rgba(59, 130, 246, 0.35);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --panel-backdrop: rgba(17, 24, 39, 0.75);
+  
+  /* Highlight colors */
+  --match-highlight-bg: rgba(234, 179, 8, 0.3); /* Yellow */
+  --match-active-highlight-bg: rgba(249, 115, 22, 0.5); /* Orange */
+  --match-border: rgba(234, 179, 8, 0.6);
+  --match-active-border: rgba(249, 115, 22, 0.9);
+}
+
+/* Base resets & layout */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Header Styling */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+  height: 3.5rem;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--accent-color);
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.file-badge {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.header-stats {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Toolbar Styling */
+.app-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+  height: 3rem;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--border-color);
+  margin: 0 0.5rem;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid transparent;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.toolbar-btn.active {
+  background-color: var(--accent-muted);
+  color: var(--accent-color);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.btn-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Workspace Area */
+.app-workspace {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+.editor-outer-container {
+  display: grid;
+  grid-template-columns: 0px 1fr; /* Hide line numbers by default */
+  height: 100%;
+  width: 100%;
+  transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editor-outer-container.show-lines {
+  grid-template-columns: 55px 1fr;
+}
+
+/* Line Numbers */
+.line-numbers-container {
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size, 15px);
+  line-height: 1.6;
+  padding: 1.25rem 0.5rem 1.25rem 0;
+  text-align: right;
+  color: var(--text-muted);
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  user-select: none;
+  overflow-y: hidden;
+  white-space: pre;
+}
+
+.line-number {
+  display: block;
+  padding-right: 0.75rem;
+  opacity: 0.6;
+  transition: opacity 0.1s ease;
+}
+
+.line-number.active {
+  color: var(--accent-color);
+  font-weight: 500;
+  opacity: 1;
+}
+
+/* Editor Viewport & Layers */
+.editor-viewport {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.editor-textarea,
+.highlight-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size, 15px);
+  line-height: 1.6;
+  padding: 1.25rem;
+  margin: 0;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  overflow: auto;
+  tab-size: 4;
+}
+
+/* Word Wrap configurations dynamic via JS toggles */
+.editor-textarea.wrap,
+.highlight-layer.wrap {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+.editor-textarea.nowrap,
+.highlight-layer.nowrap {
+  white-space: pre;
+  word-break: normal;
+}
+
+/* Textarea sits on top, text is transparent during search highlights */
+.editor-textarea {
+  background: transparent;
+  color: var(--text-primary);
+  caret-color: var(--caret-color);
+  z-index: 2;
+  resize: none;
+}
+
+/* When search matches are active, make textarea text transparent so highlight-layer shows through */
+.editor-textarea.searching {
+  color: transparent;
+  -webkit-text-fill-color: transparent; /* Safari compatibility */
+}
+
+/* Selection formatting */
+.editor-textarea::selection {
+  background-color: var(--selection-bg);
+}
+
+.editor-textarea.searching::selection {
+  background-color: var(--selection-bg);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Highlight Layer (sits below textarea) */
+.highlight-layer {
+  color: var(--text-primary);
+  z-index: 1;
+  pointer-events: none;
+  /* Scrollbars hidden but matching layout of textarea */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.highlight-layer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Search Highlights */
+mark.search-match {
+  background-color: var(--match-highlight-bg);
+  box-shadow: 0 0 0 1px var(--match-border);
+  border-radius: 2px;
+  color: inherit;
+  transition: var(--transition-fast);
+}
+
+mark.search-match.active-match {
+  background-color: var(--match-active-highlight-bg);
+  box-shadow: 0 0 0 1.5px var(--match-active-border);
+  border-radius: 2px;
+}
+
+/* Find and Replace Panel */
+.find-replace-panel {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 100;
+  width: 380px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 0;
+  margin: 0;
+  display: none; /* Controlled by native dialog API */
+  flex-direction: column;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--panel-backdrop);
+}
+
+/* Backdrop for modal search dialog if open as showModal, 
+   but we will open it as modeless/show() so we can edit while searching! 
+   Wait, if it's modeless, dialog doesn't show a backdrop, which is perfect because we want to type and search simultaneously. 
+   So no backdrop is required. */
+
+.find-replace-panel[open] {
+  display: flex;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.panel-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+.panel-close-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.close-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.panel-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.panel-inputs-row {
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.input-with-options {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.panel-input {
+  width: 100%;
+  padding: 0.5rem 3.5rem 0.5rem 0.75rem; /* Padding right to make space for search option toggles */
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.panel-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-muted);
+}
+
+.search-options {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  gap: 2px;
+}
+
+.option-toggle {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  user-select: none;
+}
+
+.option-toggle:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.option-toggle.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.match-counts {
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  margin-left: 0.75rem;
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Replace row input */
+#replace-input {
+  padding-right: 0.75rem; /* No option overlays inside replace field */
+}
+
+/* Panel actions styling */
+.panel-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.nav-buttons,
+.replace-buttons {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.action-btn {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.action-btn:hover {
+  background-color: var(--border-color);
+}
+
+.action-btn:active {
+  background-color: var(--bg-primary);
+}
+
+.action-btn.icon-btn {
+  padding: 0.4rem 0.6rem;
+}
+
+.action-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Footer Styling */
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  z-index: 10;
+  height: 2rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.footer-left,
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-item {
+  display: flex;
+  align-items: center;
+}
+
+.footer-item.separator {
+  color: var(--border-color);
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.zoom-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  width: 1.1rem;
+  height: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: var(--transition-fast);
+}
+
+.zoom-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+#zoom-label {
+  min-width: 2.2rem;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+#cursor-pos-label {
+  font-family: var(--font-mono);
+}
+
+/* Helpers */
+.hide {
+  display: none !important;
+}
+
+/* Custom Scrollbars for premium appearance */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 5px;
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

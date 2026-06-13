@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antigravity Notepad</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="app-container">
+      <!-- Top Navigation Header -->
+      <header class="app-header">
+        <div class="logo-area">
+          <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+          </svg>
+          <span class="logo-text">Antigravity Notepad</span>
+          <span class="file-badge" id="current-filename-badge">untitled.txt</span>
+        </div>
+
+        <div class="header-stats">
+          <span class="stat-item">Words: <strong id="word-count-header">0</strong></span>
+          <span class="stat-item">Chars: <strong id="char-count-header">0</strong></span>
+        </div>
+      </header>
+
+      <!-- Main Action Toolbar -->
+      <section class="app-toolbar" aria-label="Toolbar controls">
+        <div class="toolbar-group">
+          <!-- File Operations -->
+          <button id="new-file-btn" class="toolbar-btn" title="New Document (Alt+N)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>New</span>
+          </button>
+          
+          <button id="open-file-btn" class="toolbar-btn" title="Open Document (Alt+O)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+            </svg>
+            <span>Open</span>
+          </button>
+
+          <button id="save-file-btn" class="toolbar-btn" title="Save Document (Alt+S)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3 3-3m-3 .75v-6m3 12h-6a2.25 2.25 0 01-2.25-2.25V6.75A2.25 2.25 0 019 4.5h6a2.25 2.25 0 012.25 2.25v10.5A2.25 2.25 0 0115 18.75z" />
+            </svg>
+            <span>Save</span>
+          </button>
+        </div>
+
+        <div class="toolbar-separator"></div>
+
+        <div class="toolbar-group">
+          <!-- Text Tools -->
+          <button id="toggle-find-btn" class="toolbar-btn" title="Find and Replace (Alt+F)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <span>Find & Replace</span>
+          </button>
+        </div>
+
+        <div class="toolbar-separator"></div>
+
+        <div class="toolbar-group">
+          <!-- View Configuration -->
+          <button id="toggle-wrap-btn" class="toolbar-btn" title="Toggle Word Wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5M3.75 9h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5" />
+            </svg>
+            <span>Word Wrap</span>
+          </button>
+
+          <button id="toggle-lines-btn" class="toolbar-btn" title="Toggle Line Numbers">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            <span>Line Numbers</span>
+          </button>
+
+          <button id="theme-toggle-btn" class="toolbar-btn" title="Toggle Dark/Light Mode">
+            <svg id="theme-sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon hide">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M3 12h2.25m13.5 0H21M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+            </svg>
+            <svg id="theme-moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+            <span>Theme</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Main Workspace -->
+      <main class="app-workspace">
+        <div id="editor-outer-container" class="editor-outer-container show-lines">
+          <!-- Line Numbers Column -->
+          <div id="line-numbers-container" class="line-numbers-container" aria-hidden="true">
+            <!-- Dynamically populated numbers go here -->
+          </div>
+
+          <!-- Dual-Layer Editor Container -->
+          <div class="editor-viewport" id="editor-viewport">
+            <!-- Highlight layer below the text -->
+            <div id="highlight-layer" class="highlight-layer" aria-hidden="true"></div>
+            
+            <!-- Transparent Textarea on top -->
+            <textarea 
+              id="editor-textarea" 
+              class="editor-textarea" 
+              spellcheck="false" 
+              placeholder="Start typing your notes here..." 
+              autocomplete="off" 
+              autocapitalize="off"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Floating Find & Replace Panel (Popover-like or absolute overlay) -->
+        <dialog id="find-replace-panel" class="find-replace-panel" aria-labelledby="find-panel-title">
+          <div class="panel-header">
+            <span id="find-panel-title" class="panel-title">Find & Replace</span>
+            <button id="close-find-btn" class="panel-close-btn" title="Close Panel (Esc)" commandfor="find-replace-panel" command="close">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="close-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="panel-content">
+            <!-- Inputs -->
+            <div class="panel-inputs-row">
+              <div class="input-with-options">
+                <input type="text" id="find-input" class="panel-input" placeholder="Find text..." autocomplete="off">
+                <div class="search-options">
+                  <button id="match-case-btn" class="option-toggle" title="Match Case (Case Sensitive)">
+                    Aa
+                  </button>
+                  <button id="regex-btn" class="option-toggle" title="Use Regular Expression (Regex)">
+                    .*
+                  </button>
+                </div>
+              </div>
+              
+              <div class="match-counts">
+                <span id="match-status-label">No matches</span>
+              </div>
+            </div>
+
+            <div class="panel-inputs-row">
+              <input type="text" id="replace-input" class="panel-input" placeholder="Replace with..." autocomplete="off">
+            </div>
+
+            <!-- Action buttons -->
+            <div class="panel-actions-row">
+              <div class="nav-buttons">
+                <button id="find-prev-btn" class="action-btn icon-btn" title="Previous Match (Shift+Enter)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                  </svg>
+                  <span>Prev</span>
+                </button>
+                
+                <button id="find-next-btn" class="action-btn icon-btn" title="Next Match (Enter)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                  <span>Next</span>
+                </button>
+              </div>
+
+              <div class="replace-buttons">
+                <button id="replace-btn" class="action-btn" title="Replace Current Match">Replace</button>
+                <button id="replace-all-btn" class="action-btn" title="Replace All Matches">Replace All</button>
+              </div>
+            </div>
+          </div>
+        </dialog>
+      </main>
+
+      <!-- Status Bar Footer -->
+      <footer class="app-footer">
+        <div class="footer-left">
+          <span id="status-message">Ready</span>
+        </div>
+        <div class="footer-right">
+          <div class="footer-item zoom-control">
+            <button id="zoom-out-btn" class="zoom-btn" title="Decrease font size">-</button>
+            <span id="zoom-label">100%</span>
+            <button id="zoom-in-btn" class="zoom-btn" title="Increase font size">+</button>
+          </div>
+          <span class="footer-item separator">|</span>
+          <span class="footer-item" id="cursor-pos-label">Ln 1, Col 1</span>
+          <span class="footer-item separator">|</span>
+          <span class="footer-item">UTF-8</span>
+        </div>
+      </footer>
+    </div>
+    
+    <!-- Hidden input for traditional file opening fallback -->
+    <input type="file" id="fallback-file-input" class="hide" accept=".txt,.js,.css,.html,.md,.json,.py,.rs,.go,.c,.cpp,.h,.sh,.yml,.yaml">
+    
+    <!-- Application Logic -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
