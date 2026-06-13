@@ -122,6 +122,18 @@
 
       <!-- Main Workspace -->
       <main class="app-workspace">
+        <!-- Document Tabs Bar -->
+        <div id="tabs-bar" class="tabs-bar">
+          <div id="tabs-container" class="tabs-container">
+            <!-- Tabs rendered dynamically -->
+          </div>
+          <button id="add-tab-btn" class="add-tab-btn" title="New Tab (Alt+T)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="add-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+        </div>
+
         <div id="editor-outer-container" class="editor-outer-container show-lines">
           <!-- Line Numbers Column -->
           <div id="line-numbers-container" class="line-numbers-container" aria-hidden="true">

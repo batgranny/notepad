@@ -1,8 +1,9 @@
 // SRE Notepad - Core Application Logic
 
 // --- Application State ---
-let currentFileHandle = null;
-let currentFilename = "untitled.txt";
+let tabs = [];
+let activeTabId = "";
+
 let activeTheme = "dark";
 let wordWrapEnabled = true;
 let lineNumbersEnabled = true;
@@ -16,6 +17,10 @@ let useRegex = false;
 
 let matches = []; // Array of { index, length }
 let activeMatchIndex = -1;
+
+// Global document state variables (represent active tab references for compatibility)
+let currentFileHandle = null;
+let currentFilename = "untitled.txt";
 let isDirty = false;
 
 // --- DOM Cache ---
@@ -71,7 +76,11 @@ const elements = {
   sreB64decodeBtn: document.getElementById("sre-b64decode-btn"),
   sreB64encodeBtn: document.getElementById("sre-b64encode-btn"),
   sreEpochToDateBtn: document.getElementById("sre-epoch-to-date-btn"),
-  sreDateToEpochBtn: document.getElementById("sre-date-to-epoch-btn")
+  sreDateToEpochBtn: document.getElementById("sre-date-to-epoch-btn"),
+
+  // Multi-Tab Elements
+  tabsContainer: document.getElementById("tabs-container"),
+  addTabBtn: document.getElementById("add-tab-btn")
 };
 
 // --- Initialization ---
@@ -110,13 +119,6 @@ function loadSettingsFromStorage() {
     updateFontSizeUI();
   }
 
-  // File Name
-  currentFilename = localStorage.getItem("notepad_filename") || "untitled.txt";
-  elements.currentFilenameBadge.textContent = currentFilename;
-
-  // Text Content
-  elements.textarea.value = localStorage.getItem("notepad_text") || "";
-  
   // Find Panel Inputs
   searchQuery = localStorage.getItem("notepad_find_query") || "";
   elements.findInput.value = searchQuery;
@@ -128,11 +130,73 @@ function loadSettingsFromStorage() {
   
   useRegex = localStorage.getItem("notepad_use_regex") === "true";
   if (useRegex) elements.regexBtn.classList.add("active");
+
+  // Load Tabs
+  const storedTabs = localStorage.getItem("notepad_tabs_data");
+  activeTabId = localStorage.getItem("notepad_active_tab_id") || "";
+  
+  if (storedTabs) {
+    try {
+      tabs = JSON.parse(storedTabs);
+      // Ensure fileHandle references are initialized to null (non-serializable)
+      tabs.forEach(t => {
+        t.fileHandle = null;
+      });
+    } catch (e) {
+      tabs = [];
+    }
+  }
+
+  if (tabs.length === 0) {
+    // Spawn default tab
+    createNewTab("untitled.txt", "", null, false);
+  }
+
+  if (!activeTabId || !tabs.some(t => t.id === activeTabId)) {
+    activeTabId = tabs[0].id;
+  }
+
+  // Populate active tab state into editor
+  const activeTab = getActiveTab();
+  elements.textarea.value = activeTab.text;
+  currentFilename = activeTab.filename;
+  currentFileHandle = activeTab.fileHandle;
+  isDirty = activeTab.isDirty;
+  
+  elements.currentFilenameBadge.textContent = currentFilename;
+  
+  // Render tabs in the DOM
+  renderTabs();
 }
 
 function saveStateToStorage() {
-  localStorage.setItem("notepad_text", elements.textarea.value);
-  localStorage.setItem("notepad_filename", currentFilename);
+  // Save current active tab text, selection, scroll to active tab object
+  const activeTab = getActiveTab();
+  if (activeTab) {
+    activeTab.text = elements.textarea.value;
+    activeTab.isDirty = isDirty;
+    activeTab.filename = currentFilename;
+    activeTab.cursorStart = elements.textarea.selectionStart;
+    activeTab.cursorEnd = elements.textarea.selectionEnd;
+    activeTab.scrollTop = elements.textarea.scrollTop;
+    activeTab.scrollLeft = elements.textarea.scrollLeft;
+  }
+
+  // Serialize tabs (strip out fileHandle which is not serializable)
+  const tabsCopy = tabs.map(t => ({
+    id: t.id,
+    filename: t.filename,
+    text: t.text,
+    isDirty: t.isDirty,
+    cursorStart: t.cursorStart,
+    cursorEnd: t.cursorEnd,
+    scrollTop: t.scrollTop,
+    scrollLeft: t.scrollLeft
+  }));
+
+  localStorage.setItem("notepad_tabs_data", JSON.stringify(tabsCopy));
+  localStorage.setItem("notepad_active_tab_id", activeTabId);
+
   localStorage.setItem("notepad_theme", activeTheme);
   localStorage.setItem("notepad_wrap", wordWrapEnabled.toString());
   localStorage.setItem("notepad_lines", lineNumbersEnabled.toString());
@@ -143,19 +207,16 @@ function saveStateToStorage() {
   localStorage.setItem("notepad_replace_query", replaceQuery);
   localStorage.setItem("notepad_match_case", matchCase.toString());
   localStorage.setItem("notepad_use_regex", useRegex.toString());
-  
-  // Scroll and Cursor Positions
-  localStorage.setItem("notepad_cursor_start", elements.textarea.selectionStart.toString());
-  localStorage.setItem("notepad_cursor_end", elements.textarea.selectionEnd.toString());
-  localStorage.setItem("notepad_scroll_top", elements.textarea.scrollTop.toString());
-  localStorage.setItem("notepad_scroll_left", elements.textarea.scrollLeft.toString());
 }
 
 function restoreEditorScrollAndCursor() {
-  const start = parseInt(localStorage.getItem("notepad_cursor_start") || "0", 10);
-  const end = parseInt(localStorage.getItem("notepad_cursor_end") || "0", 10);
-  const scrollTop = parseInt(localStorage.getItem("notepad_scroll_top") || "0", 10);
-  const scrollLeft = parseInt(localStorage.getItem("notepad_scroll_left") || "0", 10);
+  const activeTab = getActiveTab();
+  if (!activeTab) return;
+
+  const start = activeTab.cursorStart || 0;
+  const end = activeTab.cursorEnd || 0;
+  const scrollTop = activeTab.scrollTop || 0;
+  const scrollLeft = activeTab.scrollLeft || 0;
 
   // Restore cursor selection
   if (start <= elements.textarea.value.length && end <= elements.textarea.value.length) {
@@ -217,26 +278,39 @@ function setupEventListeners() {
       e.preventDefault();
       openFile();
     }
-    // New: Alt+N
+    // New Tab: Alt+N
     if (e.altKey && e.key.toLowerCase() === "n") {
       e.preventDefault();
-      newFile();
+      createNewTab("untitled.txt", "", null, true);
     }
     // Find: Alt+F
     if (e.altKey && e.key.toLowerCase() === "f") {
       e.preventDefault();
       toggleFindPanel();
     }
+    // Close Tab: Alt+W
+    if (e.altKey && e.key.toLowerCase() === "w") {
+      e.preventDefault();
+      closeTab(activeTabId);
+    }
+    // Add Tab: Alt+T
+    if (e.altKey && e.key.toLowerCase() === "t") {
+      e.preventDefault();
+      createNewTab("untitled.txt", "", null, true);
+    }
   });
 
   // Toolbar Actions
-  elements.newFileBtn.addEventListener("click", newFile);
+  elements.newFileBtn.addEventListener("click", () => createNewTab("untitled.txt", "", null, true));
   elements.openFileBtn.addEventListener("click", openFile);
   elements.saveFileBtn.addEventListener("click", saveFile);
   elements.toggleFindBtn.addEventListener("click", toggleFindPanel);
   elements.toggleWrapBtn.addEventListener("click", toggleWordWrap);
   elements.toggleLinesBtn.addEventListener("click", toggleLineNumbers);
   elements.themeToggleBtn.addEventListener("click", toggleTheme);
+
+  // Tab Add Button Action
+  elements.addTabBtn.addEventListener("click", () => createNewTab("untitled.txt", "", null, true));
 
   // SRE Tools dropdown toggle
   elements.sreToolsBtn.addEventListener("click", (e) => {
@@ -350,9 +424,17 @@ function setupEventListeners() {
 function syncEditor() {
   const text = elements.textarea.value;
   
+  // Update state values on active tab object
+  const activeTab = getActiveTab();
+  if (activeTab) {
+    activeTab.text = text;
+    activeTab.isDirty = isDirty;
+    activeTab.filename = currentFilename;
+    activeTab.fileHandle = currentFileHandle;
+  }
+
   // Word & Character count
   const charCount = text.length;
-  // Count words (matching letters/numbers)
   const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
   
   elements.wordCountHeader.textContent = wordCount.toLocaleString();
@@ -372,7 +454,146 @@ function syncEditor() {
 
   updateCursorPosition();
   highlightActiveLineNumber();
+  
+  // Render tabs in tabs bar to reflect changes
+  renderTabs();
+  
   saveStateToStorage();
+}
+
+// --- Multi-Tab Helpers ---
+
+function getActiveTab() {
+  return tabs.find(t => t.id === activeTabId);
+}
+
+function createNewTab(filename = "untitled.txt", text = "", fileHandle = null, switchImmediately = true) {
+  const newTab = {
+    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    filename: filename,
+    text: text,
+    isDirty: false,
+    fileHandle: fileHandle,
+    cursorStart: 0,
+    cursorEnd: 0,
+    scrollTop: 0,
+    scrollLeft: 0
+  };
+
+  tabs.push(newTab);
+
+  if (switchImmediately) {
+    switchTab(newTab.id);
+  } else {
+    renderTabs();
+    saveStateToStorage();
+  }
+  return newTab;
+}
+
+function switchTab(tabId) {
+  if (activeTabId === tabId && tabs.some(t => t.id === tabId)) {
+    restoreEditorScrollAndCursor();
+    return;
+  }
+
+  // 1. Save state parameters of currently active tab
+  const currentTab = getActiveTab();
+  if (currentTab) {
+    currentTab.text = elements.textarea.value;
+    currentTab.isDirty = isDirty;
+    currentTab.filename = currentFilename;
+    currentTab.fileHandle = currentFileHandle;
+    currentTab.cursorStart = elements.textarea.selectionStart;
+    currentTab.cursorEnd = elements.textarea.selectionEnd;
+    currentTab.scrollTop = elements.textarea.scrollTop;
+    currentTab.scrollLeft = elements.textarea.scrollLeft;
+  }
+
+  // 2. Set new active tab
+  activeTabId = tabId;
+  const newTab = getActiveTab();
+
+  if (newTab) {
+    // 3. Load tab values into global state variables
+    elements.textarea.value = newTab.text;
+    currentFilename = newTab.filename;
+    currentFileHandle = newTab.fileHandle;
+    isDirty = newTab.isDirty;
+
+    elements.currentFilenameBadge.textContent = currentFilename;
+
+    // Reset search markers
+    if (findPanelOpen) {
+      performSearch(true, false);
+    } else {
+      syncEditor();
+    }
+
+    // 4. Restore scroll coordinates and selections
+    restoreEditorScrollAndCursor();
+  }
+}
+
+function closeTab(tabId) {
+  const targetTab = tabs.find(t => t.id === tabId);
+  if (!targetTab) return;
+
+  if (targetTab.isDirty) {
+    const confirmDiscard = confirm(`"${targetTab.filename}" has unsaved changes. Do you want to discard them?`);
+    if (!confirmDiscard) return;
+  }
+
+  const tabIndex = tabs.findIndex(t => t.id === tabId);
+  tabs.splice(tabIndex, 1);
+
+  if (tabs.length === 0) {
+    // Recreate single default tab
+    createNewTab("untitled.txt", "", null, true);
+  } else if (activeTabId === tabId) {
+    // Switch active focus to neighbor tab
+    const nextActiveIdx = Math.min(tabIndex, tabs.length - 1);
+    switchTab(tabs[nextActiveIdx].id);
+  } else {
+    renderTabs();
+    saveStateToStorage();
+  }
+}
+
+function renderTabs() {
+  let html = "";
+  tabs.forEach(tab => {
+    const isActive = tab.id === activeTabId;
+    const activeClass = isActive ? "active" : "";
+    const dirtyClass = tab.isDirty ? "dirty" : "";
+
+    html += `
+      <div class="tab-item ${activeClass} ${dirtyClass}" data-id="${tab.id}">
+        <span class="tab-title" title="${tab.filename}">${tab.filename}</span>
+        <button class="tab-close-btn" title="Close Tab (Alt+W)" data-id="${tab.id}">
+          <svg class="tab-close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    `;
+  });
+
+  elements.tabsContainer.innerHTML = html;
+
+  // Add click handlers
+  const tabElements = elements.tabsContainer.querySelectorAll(".tab-item");
+  tabElements.forEach(el => {
+    el.addEventListener("click", (e) => {
+      const tabId = el.getAttribute("data-id");
+      if (e.target.closest(".tab-close-btn")) {
+        e.stopPropagation();
+        closeTab(tabId);
+      } else {
+        switchTab(tabId);
+      }
+    });
+  });
 }
 
 // --- Line Numbers Rendering ---
@@ -500,7 +721,7 @@ function updateFontSizeUI() {
   
   // Set custom style property for font sizes on elements
   elements.textarea.style.setProperty("--editor-font-size", `${editorFontSize}px`);
-  elements.highlightLayer.setProperty = elements.highlightLayer.style.setProperty("--editor-font-size", `${editorFontSize}px`);
+  elements.highlightLayer.style.setProperty("--editor-font-size", `${editorFontSize}px`);
   elements.lineNumbersContainer.style.setProperty("--editor-font-size", `${editorFontSize}px`);
 }
 
@@ -526,6 +747,7 @@ function toggleFindPanel() {
   }
 }
 
+// Open Find Panel
 function openFindPanel() {
   findPanelOpen = true;
   elements.toggleFindBtn.classList.add("active");
@@ -760,35 +982,8 @@ function replaceAllMatches() {
 
 // --- File Operations ---
 
-// 1. New File
-function newFile() {
-  if (isDirty) {
-    const confirmDiscard = confirm("You have unsaved changes. Do you want to discard them?");
-    if (!confirmDiscard) return;
-  }
-  
-  elements.textarea.value = "";
-  currentFilename = "untitled.txt";
-  currentFileHandle = null;
-  elements.currentFilenameBadge.textContent = currentFilename;
-  isDirty = false;
-  
-  // Reset scroll and selections
-  elements.textarea.scrollTop = 0;
-  elements.textarea.scrollLeft = 0;
-  elements.textarea.setSelectionRange(0, 0);
-
-  syncEditor();
-  showTemporaryStatus("Created new file");
-}
-
-// 2. Open File
+// 1. Open File
 async function openFile() {
-  if (isDirty) {
-    const confirmDiscard = confirm("You have unsaved changes. Do you want to discard them?");
-    if (!confirmDiscard) return;
-  }
-
   const hasFileSystemAccess = "showOpenFilePicker" in window;
   
   if (hasFileSystemAccess) {
@@ -802,21 +997,26 @@ async function openFile() {
         }]
       });
       
-      currentFileHandle = handle;
       const file = await handle.getFile();
       const text = await file.text();
       
-      elements.textarea.value = text;
-      currentFilename = file.name;
-      elements.currentFilenameBadge.textContent = currentFilename;
-      isDirty = false;
-      
-      // Reset scroll
-      elements.textarea.scrollTop = 0;
-      elements.textarea.scrollLeft = 0;
-      
-      syncEditor();
-      showTemporaryStatus(`Opened ${currentFilename}`);
+      const activeTab = getActiveTab();
+      // If current tab is clean & blank, open in-place. Otherwise open in a new tab.
+      if (activeTab && elements.textarea.value === "" && !isDirty && activeTab.filename === "untitled.txt") {
+        currentFileHandle = handle;
+        currentFilename = file.name;
+        elements.textarea.value = text;
+        isDirty = false;
+        
+        elements.textarea.scrollTop = 0;
+        elements.textarea.scrollLeft = 0;
+        
+        syncEditor();
+        showTemporaryStatus(`Opened ${currentFilename}`);
+      } else {
+        createNewTab(file.name, text, handle, true);
+        showTemporaryStatus(`Opened ${file.name} in new tab`);
+      }
     } catch (err) {
       if (err.name !== "AbortError") {
         console.error(err);
@@ -836,17 +1036,25 @@ function handleFallbackFileOpen(e) {
 
   const reader = new FileReader();
   reader.onload = function(evt) {
-    elements.textarea.value = evt.target.result;
-    currentFilename = file.name;
-    elements.currentFilenameBadge.textContent = currentFilename;
-    currentFileHandle = null; // No file handles in fallback
-    isDirty = false;
+    const text = evt.target.result;
+    const activeTab = getActiveTab();
     
-    elements.textarea.scrollTop = 0;
-    elements.textarea.scrollLeft = 0;
-    
-    syncEditor();
-    showTemporaryStatus(`Opened ${currentFilename} (local load)`);
+    // If current tab is clean & blank, open in-place. Otherwise open in a new tab.
+    if (activeTab && elements.textarea.value === "" && !isDirty && activeTab.filename === "untitled.txt") {
+      elements.textarea.value = text;
+      currentFilename = file.name;
+      currentFileHandle = null; // No file handles in fallback
+      isDirty = false;
+      
+      elements.textarea.scrollTop = 0;
+      elements.textarea.scrollLeft = 0;
+      
+      syncEditor();
+      showTemporaryStatus(`Opened ${currentFilename} (local load)`);
+    } else {
+      createNewTab(file.name, text, null, true);
+      showTemporaryStatus(`Opened ${file.name} in new tab`);
+    }
   };
   reader.onerror = function() {
     showTemporaryStatus("Failed to read file");
@@ -854,7 +1062,7 @@ function handleFallbackFileOpen(e) {
   reader.readAsText(file);
 }
 
-// 3. Save File
+// 2. Save File
 async function saveFile() {
   const hasFileSystemAccess = "showSaveFilePicker" in window;
   
@@ -866,6 +1074,7 @@ async function saveFile() {
         await writable.close();
         
         isDirty = false;
+        syncEditor();
         showTemporaryStatus(`Saved ${currentFilename}`);
       } catch (err) {
         console.error("Direct write failed, trying Save As...", err);
@@ -890,6 +1099,7 @@ async function saveFile() {
     URL.revokeObjectURL(url);
     
     isDirty = false;
+    syncEditor();
     showTemporaryStatus(`Downloaded ${currentFilename}`);
   }
 }
@@ -916,6 +1126,7 @@ async function saveFileAs() {
     await writable.close();
     
     isDirty = false;
+    syncEditor();
     showTemporaryStatus(`Saved ${currentFilename}`);
   } catch (err) {
     if (err.name !== "AbortError") {
