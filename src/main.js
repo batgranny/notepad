@@ -1,4 +1,4 @@
-// Antigravity Notepad - Core Application Logic
+// SRE Notepad - Core Application Logic
 
 // --- Application State ---
 let currentFileHandle = null;

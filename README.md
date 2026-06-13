@@ -1,4 +1,4 @@
-# Antigravity Notepad
+# SRE Notepad
 
 A modern, high-performance, and visually stunning browser-based notepad application. Built with **Vite + Vanilla JavaScript** and served via **Nginx** inside a lightweight Docker container, it offers a premium desktop-class text editing experience directly in the browser.
 
