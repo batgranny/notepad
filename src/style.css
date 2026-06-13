@@ -224,6 +224,7 @@ body {
   user-select: none;
   overflow-y: hidden;
   white-space: pre;
+  overscroll-behavior: none; /* Prevent scroll bounce mismatch */
 }
 
 .line-number {
@@ -264,6 +265,7 @@ body {
   box-sizing: border-box;
   overflow: auto;
   tab-size: 4;
+  overscroll-behavior: none; /* Prevent elastic boundary scroll bounce double-exposure */
 }
 
 /* Word Wrap configurations dynamic via JS toggles */
