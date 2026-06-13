@@ -200,11 +200,15 @@ body {
   grid-template-columns: 0px 1fr; /* Hide line numbers by default */
   height: 100%;
   width: 100%;
-  transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1), padding-right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .editor-outer-container.show-lines {
   grid-template-columns: 55px 1fr;
+}
+
+.editor-outer-container.find-open {
+  padding-right: 380px;
 }
 
 /* Line Numbers */
@@ -334,14 +338,19 @@ mark.search-match.active-match {
 /* Find and Replace Panel */
 .find-replace-panel {
   position: absolute;
-  top: 1rem;
-  right: 1.5rem;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
   z-index: 100;
   width: 380px;
   background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+  border-left: 1px solid var(--border-color);
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+  border-radius: 0;
+  box-shadow: none;
   padding: 0;
   margin: 0;
   display: none; /* Controlled by native dialog API */

@@ -329,6 +329,7 @@ function setupEventListeners() {
   elements.findReplacePanel.addEventListener("close", () => {
     findPanelOpen = false;
     elements.toggleFindBtn.classList.remove("active");
+    elements.editorOuterContainer.classList.remove("find-open");
     elements.textarea.classList.remove("searching");
     elements.textarea.focus();
     saveStateToStorage();
@@ -528,6 +529,7 @@ function toggleFindPanel() {
 function openFindPanel() {
   findPanelOpen = true;
   elements.toggleFindBtn.classList.add("active");
+  elements.editorOuterContainer.classList.add("find-open");
   elements.findReplacePanel.show(); // Show modeless dialog
   elements.findInput.focus();
   elements.findInput.select();
