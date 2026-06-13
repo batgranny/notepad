@@ -76,7 +76,7 @@ To build and run the application locally inside a container:
    ```
 
 3. **Access the application**:
-   Open `http://localhost:8080` in your web browser.
+   Open `http://localhost:8085` in your web browser.
 
 4. **Stop the container**:
    ```bash
