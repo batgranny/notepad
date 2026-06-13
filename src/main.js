@@ -179,7 +179,7 @@ function setupEventListeners() {
     isDirty = true;
     syncEditor();
     if (findPanelOpen && searchQuery) {
-      performSearch(false); // Refilter highlights without shifting index
+      performSearch(false, false); // Refilter highlights without shifting index or stealing focus
     }
   });
 
@@ -283,7 +283,7 @@ function setupEventListeners() {
   // Find & Replace Inputs & Controls
   elements.findInput.addEventListener("input", () => {
     searchQuery = elements.findInput.value;
-    performSearch(true); // Reset to index 0 on search term changes
+    performSearch(true, false); // Reset to index 0 on search term changes, do NOT steal focus
   });
 
   elements.replaceInput.addEventListener("input", () => {
@@ -294,13 +294,13 @@ function setupEventListeners() {
   elements.matchCaseBtn.addEventListener("click", () => {
     matchCase = !matchCase;
     elements.matchCaseBtn.classList.toggle("active", matchCase);
-    performSearch(true);
+    performSearch(true, false);
   });
 
   elements.regexBtn.addEventListener("click", () => {
     useRegex = !useRegex;
     elements.regexBtn.classList.toggle("active", useRegex);
-    performSearch(true);
+    performSearch(true, false);
   });
 
   elements.findNextBtn.addEventListener("click", navigateNextMatch);
@@ -533,7 +533,7 @@ function openFindPanel() {
   elements.findReplacePanel.show(); // Show modeless dialog
   elements.findInput.focus();
   elements.findInput.select();
-  performSearch(true);
+  performSearch(true, false);
 }
 
 function closeFindPanel() {
@@ -541,7 +541,7 @@ function closeFindPanel() {
 }
 
 // --- Search / Highlight Logic ---
-function performSearch(resetIndex = true) {
+function performSearch(resetIndex = true, shouldFocus = true) {
   const text = elements.textarea.value;
   matches = [];
   
@@ -615,7 +615,7 @@ function performSearch(resetIndex = true) {
   syncEditor();
   
   // Highlight active match in textarea selection context if requested
-  if (resetIndex && matches.length > 0) {
+  if (resetIndex && matches.length > 0 && shouldFocus) {
     scrollToActiveMatch();
   }
 }
@@ -723,7 +723,7 @@ function replaceCurrentMatch() {
   showTemporaryStatus("Replaced 1 match");
 
   // Re-run search matching at current query
-  performSearch(false);
+  performSearch(false, false);
   
   // If matches still exist, cycle/focus next one
   if (matches.length > 0) {
@@ -755,7 +755,7 @@ function replaceAllMatches() {
   showTemporaryStatus(`Replaced all ${count} occurrences`);
   
   // Reset search state
-  performSearch(true);
+  performSearch(true, false);
 }
 
 // --- File Operations ---
