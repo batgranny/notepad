@@ -340,8 +340,11 @@ mark.search-match.active-match {
   position: absolute;
   top: 0;
   right: 0;
+  left: auto; /* Explicitly override user-agent left: 0 */
   bottom: 0;
   height: 100%;
+  max-height: none; /* Override user-agent default restrictions */
+  max-width: none; /* Override user-agent default restrictions */
   z-index: 100;
   width: 380px;
   background-color: var(--bg-secondary);
