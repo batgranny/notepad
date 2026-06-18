@@ -394,7 +394,8 @@ body {
   border: none;
   outline: none;
   box-sizing: border-box;
-  overflow: auto;
+  overflow-y: scroll;
+  overflow-x: auto;
   tab-size: 4;
   overscroll-behavior: none; /* Prevent elastic boundary scroll bounce double-exposure */
 }
@@ -444,13 +445,22 @@ body {
   color: var(--text-primary);
   z-index: 1;
   pointer-events: none;
-  /* Scrollbars hidden but matching layout of textarea */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  /* Transparent scrollbars so they take up space but remain invisible */
+  scrollbar-color: transparent transparent;
 }
 
 .highlight-layer::-webkit-scrollbar {
-  display: none;
+  width: 10px;
+  height: 10px;
+}
+
+.highlight-layer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.highlight-layer::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: none;
 }
 
 /* Search Highlights */

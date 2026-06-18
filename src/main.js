@@ -75,6 +75,8 @@ const elements = {
   sreJsonBtn: document.getElementById("sre-json-btn"),
   sreB64decodeBtn: document.getElementById("sre-b64decode-btn"),
   sreB64encodeBtn: document.getElementById("sre-b64encode-btn"),
+  sreHexdecodeBtn: document.getElementById("sre-hexdecode-btn"),
+  sreHexencodeBtn: document.getElementById("sre-hexencode-btn"),
   sreEpochToDateBtn: document.getElementById("sre-epoch-to-date-btn"),
   sreDateToEpochBtn: document.getElementById("sre-date-to-epoch-btn"),
 
@@ -341,6 +343,14 @@ function setupEventListeners() {
   elements.sreB64encodeBtn.addEventListener("click", () => {
     closeSreToolsMenu();
     base64Encode();
+  });
+  elements.sreHexdecodeBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    hexDecode();
+  });
+  elements.sreHexencodeBtn.addEventListener("click", () => {
+    closeSreToolsMenu();
+    hexEncode();
   });
   elements.sreEpochToDateBtn.addEventListener("click", () => {
     closeSreToolsMenu();
@@ -1259,6 +1269,96 @@ function base64Encode() {
       isDirty = true;
       syncEditor();
       showTemporaryStatus("Encoded document to Base64");
+    } catch (e) {
+      showTemporaryStatus("Error during encoding");
+    }
+  }
+}
+
+// UTF-8 friendly Hex helper methods
+function stringToHex(str) {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(str);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToString(hex) {
+  const cleanHex = hex.replace(/0x/gi, '').replace(/[^0-9A-Fa-f]/g, '');
+  if (cleanHex.length % 2 !== 0) {
+    throw new Error("Invalid hex length");
+  }
+  const bytes = new Uint8Array(cleanHex.length / 2);
+  for (let i = 0; i < cleanHex.length; i += 2) {
+    bytes[i / 2] = parseInt(cleanHex.substring(i, i + 2), 16);
+  }
+  const decoder = new TextDecoder('utf-8', { fatal: true });
+  return decoder.decode(bytes);
+}
+
+// 4. Hex Decode
+function hexDecode() {
+  const tx = elements.textarea;
+  const start = tx.selectionStart;
+  const end = tx.selectionEnd;
+  const selectedText = tx.value.substring(start, end);
+  
+  if (start !== end && selectedText.trim().length > 0) {
+    try {
+      const decoded = hexToString(selectedText);
+      tx.value = tx.value.substring(0, start) + decoded + tx.value.substring(end);
+      tx.setSelectionRange(start, start + decoded.length);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Decoded selected Hex");
+    } catch (e) {
+      showTemporaryStatus("Error: Invalid Hex selected");
+    }
+  } else {
+    if (tx.value.trim().length === 0) {
+      showTemporaryStatus("Error: Document is empty");
+      return;
+    }
+    try {
+      const decoded = hexToString(tx.value);
+      tx.value = decoded;
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Decoded Hex document");
+    } catch (e) {
+      showTemporaryStatus("Error: Document is not valid Hex");
+    }
+  }
+}
+
+// 5. Hex Encode
+function hexEncode() {
+  const tx = elements.textarea;
+  const start = tx.selectionStart;
+  const end = tx.selectionEnd;
+  const selectedText = tx.value.substring(start, end);
+  
+  if (start !== end && selectedText.trim().length > 0) {
+    try {
+      const encoded = stringToHex(selectedText);
+      tx.value = tx.value.substring(0, start) + encoded + tx.value.substring(end);
+      tx.setSelectionRange(start, start + encoded.length);
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Encoded selected text to Hex");
+    } catch (e) {
+      showTemporaryStatus("Error during encoding");
+    }
+  } else {
+    if (tx.value.length === 0) {
+      showTemporaryStatus("Error: Document is empty");
+      return;
+    }
+    try {
+      const encoded = stringToHex(tx.value);
+      tx.value = encoded;
+      isDirty = true;
+      syncEditor();
+      showTemporaryStatus("Encoded document to Hex");
     } catch (e) {
       showTemporaryStatus("Error during encoding");
     }
