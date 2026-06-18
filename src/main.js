@@ -409,14 +409,13 @@ function setupEventListeners() {
   elements.replaceBtn.addEventListener("click", replaceCurrentMatch);
   elements.replaceAllBtn.addEventListener("click", replaceAllMatches);
 
-  // Close Find Panel
   elements.findReplacePanel.addEventListener("close", () => {
     findPanelOpen = false;
     elements.toggleFindBtn.classList.remove("active");
     elements.editorOuterContainer.classList.remove("find-open");
     elements.textarea.classList.remove("searching");
     elements.textarea.focus();
-    saveStateToStorage();
+    syncEditor();
   });
 
   // Zoom Settings
