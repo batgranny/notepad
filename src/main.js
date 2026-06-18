@@ -459,7 +459,7 @@ function syncEditor() {
     renderSearchHighlights();
   } else {
     elements.textarea.classList.remove("searching");
-    elements.highlightLayer.textContent = text;
+    elements.highlightLayer.textContent = "";
   }
 
   updateCursorPosition();
