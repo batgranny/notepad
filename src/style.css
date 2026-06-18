@@ -274,6 +274,19 @@ body {
   margin-right: 0.25rem;
 }
 
+.tab-rename-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
 .tab-close-btn {
   background: none;
   border: none;

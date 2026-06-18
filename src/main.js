@@ -602,6 +602,80 @@ function renderTabs() {
         switchTab(tabId);
       }
     });
+
+    // Double-click to rename tab
+    const titleSpan = el.querySelector(".tab-title");
+    titleSpan.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      initiateTabRename(el, titleSpan);
+    });
+  });
+}
+
+function initiateTabRename(tabElement, titleSpan) {
+  const tabId = tabElement.getAttribute("data-id");
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+
+  if (tabElement.querySelector(".tab-rename-input")) return;
+
+  const currentName = tab.filename;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "tab-rename-input";
+  input.value = currentName;
+
+  titleSpan.replaceWith(input);
+  input.focus();
+
+  const lastDot = currentName.lastIndexOf(".");
+  if (lastDot > 0) {
+    input.setSelectionRange(0, lastDot);
+  } else {
+    input.select();
+  }
+
+  let finished = false;
+
+  const finishRename = (cancel = false) => {
+    if (finished) return;
+    finished = true;
+
+    if (!cancel) {
+      const newName = input.value.trim();
+      if (newName && newName !== currentName) {
+        tab.filename = newName;
+        if (tabId === activeTabId) {
+          currentFilename = newName;
+          elements.currentFilenameBadge.textContent = newName;
+        }
+        showTemporaryStatus(`Renamed tab to "${newName}"`);
+      }
+    }
+
+    renderTabs();
+    saveStateToStorage();
+  };
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      finishRename(false);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      finishRename(true);
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    finishRename(false);
+  });
+
+  input.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+  input.addEventListener("dblclick", (e) => {
+    e.stopPropagation();
   });
 }
 
